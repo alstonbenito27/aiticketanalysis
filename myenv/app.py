@@ -2,7 +2,8 @@ import streamlit as st
 import os
 
 def main():
-    st.set_page_config(page_title="AI Inventory Forecasting", page_icon="📊", layout="centered")
+    st.set_page_config(page_title="AI Ticket Forecasting", page_icon="📊", layout="wide")
+
    
     custom_css = """
     <style>
@@ -44,8 +45,8 @@ def main():
     """
     st.markdown(custom_css, unsafe_allow_html=True)
    
-    st.markdown("<div class='main-title'>AI Inventory Forecasting</div>", unsafe_allow_html=True)
-    st.markdown("<div class='sub-text'>Welcome to the AI-powered inventory forecasting system.</div>", unsafe_allow_html=True)
+    st.markdown("<div class='main-title'>AI Ticket Forecasting</div>", unsafe_allow_html=True)
+    st.markdown("<div class='sub-text'>Welcome to the AI-powered ticket forecasting system.</div>", unsafe_allow_html=True)
    
     col1, col2, col3 = st.columns([1,2,1])
     with col2:

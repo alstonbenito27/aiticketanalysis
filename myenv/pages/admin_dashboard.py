@@ -2,9 +2,9 @@ import streamlit as st
 import boto3
 
 # AWS S3 Configuration
-REPORT_BUCKET = "dem-forecast-report"
-FINAL_BUCKET = "dem-forecast-final"
-LOGS_BUCKET = "ticket-final-reports"
+REPORT_BUCKET = "ticket-final-reports"
+FINAL_BUCKET = "ticket-triggered-reports"
+LOGS_BUCKET = "ticket-all-logs"
 AWS_REGION = "us-east-1"
 
 # Initialize S3 Client
@@ -36,7 +36,6 @@ def move_file_to_final(username, filename, source_bucket):
     dest_key = f"{username}/{filename}"
     
     try:
-        # Move file to the final bucket
         s3_client.copy_object(Bucket=FINAL_BUCKET, CopySource={"Bucket": source_bucket, "Key": source_key}, Key=dest_key)
         s3_client.delete_object(Bucket=source_bucket, Key=source_key)
         return "Success"
@@ -61,14 +60,14 @@ def show_admin_dashboard():
     st.title("Admin Dashboard")
 
     # === REPORTS SECTION ===
-    st.subheader("📂 Generated Reports")
+    st.subheader("\U0001F4C2 Generated Reports")
     reports_by_user = list_s3_files(REPORT_BUCKET)
     
     selected_reports = []
     
     if reports_by_user:
         for username, reports in reports_by_user.items():
-            with st.expander(f"📁 {username} Reports"):
+            with st.expander(f"\U0001F4C1 {username} Reports"):
                 user_selected = []
                 for report in reports:
                     is_selected = st.checkbox(report, key=f"{username}_{report}")
@@ -112,6 +111,39 @@ def show_admin_dashboard():
                         st.download_button("⬇ Download", file_data, log)
     else:
         st.info("No user logs available.")
+
+    # === MODEL PERFORMANCE METRICS ===
+    st.subheader("📊 Model Performance Metrics")
+    metrics = {
+        "Random Forest Regression": {"MAE": 2.76, "MSE": 18.98, "R2 Score": 0.65},
+        "Gradient Boosting Regression": {"MAE": 3.02, "MSE": 20.37, "R2 Score": 0.62},
+        "Linear Regression": {"MAE": 4.73, "MSE": 43.32, "R2 Score": 0.20},
+    }
+    for model, scores in metrics.items():
+        with st.expander(f"⚙ {model} Performance"):
+            st.write(scores)
+    
+    st.subheader("🎯 Priority Prediction Performance")
+    st.write("Accuracy: 0.39495")
+    st.text("Classification Report:")
+    st.code("""
+              precision    recall  f1-score   support
+           0       0.30      0.27      0.29      5977
+           1       0.35      0.35      0.35      3369
+           2       0.23      0.12      0.16      3261
+           3       0.50      0.63      0.56      7393
+    accuracy                           0.39     20000
+    """)
+    
+    st.subheader("🎟 Ticket Type Prediction Performance")
+    st.write("Accuracy: 0.72345")
+    st.text("Classification Report:")
+    st.code("""
+              precision    recall  f1-score   support
+           0       0.24      0.04      0.07      5074
+           1       0.75      0.96      0.84     14926
+    accuracy                           0.72     20000
+    """)
 
     # Logout Button
     if st.button("🚪 Logout"):
